@@ -6,11 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assignment.Framework.ApiDtos
 {
-    public class ApiErrorResponseDto
-    {
-    }
-
-    public class ErrorViewModel
+    public class ResponseDto
     {
         public string Code { get; set; }
         public string Message { get; set; }

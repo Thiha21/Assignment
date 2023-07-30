@@ -30,7 +30,7 @@ namespace Assignment.Api.Controllers
             }
             catch (AppException e)
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeInternalError,
                     Message = ErrorMessages.ErrorMessageInternalError,
@@ -50,7 +50,7 @@ namespace Assignment.Api.Controllers
             }
             catch (AppException e)
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeInternalError,
                     Message = ErrorMessages.ErrorMessageInternalError,
@@ -71,7 +71,7 @@ namespace Assignment.Api.Controllers
             }
             catch (AppException e)
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeInternalError,
                     Message = ErrorMessages.ErrorMessageInternalError,
@@ -85,7 +85,7 @@ namespace Assignment.Api.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeBadRequest,
                     Message = ErrorMessages.ErrorMessageUnknownFormat,
@@ -95,7 +95,7 @@ namespace Assignment.Api.Controllers
 
             if (file.Length > 1048576)
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeBadRequest,
                     Message = ErrorMessages.ErrorMessageUnknownFormat,
@@ -112,7 +112,7 @@ namespace Assignment.Api.Controllers
                 }
                 catch (AppException e)
                 {
-                    return BadRequest(new ErrorViewModel
+                    return BadRequest(new ResponseDto
                     {
                         Code = ErrorCodes.ErrorCodeBadRequest,
                         Message = ErrorMessages.ErrorMessageValidationError,
@@ -121,7 +121,7 @@ namespace Assignment.Api.Controllers
                 }
                 catch(Exception e)
                 {
-                    return BadRequest(new ErrorViewModel
+                    return BadRequest(new ResponseDto
                     {
                         Code = ErrorCodes.ErrorCodeInternalError,
                         Message = ErrorMessages.ErrorMessageInternalError,
@@ -131,7 +131,7 @@ namespace Assignment.Api.Controllers
             }
             else
             {
-                return BadRequest(new ErrorViewModel
+                return BadRequest(new ResponseDto
                 {
                     Code = ErrorCodes.ErrorCodeBadRequest,
                     Message = ErrorMessages.ErrorMessageUnknownFormat,
@@ -139,7 +139,7 @@ namespace Assignment.Api.Controllers
                 });
             }
 
-            return Ok(new ErrorViewModel
+            return Ok(new ResponseDto
             {
                 Code = "200",
                 Message = "Success",

@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container mt-4">
+    <h3>Import Transaction File</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <input type="file" id="fileInput" class="form-control" accept=".csv, .xml">
+        </div>
+        <div class="col-md-6">
+            <button id="uploadButton" class="btn btn-primary">Import</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Handle file upload when the "Upload" button is clicked
+    document.getElementById('uploadButton').addEventListener('click', function () {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+
+        if (file) {
+            var formData = new FormData();
+            formData.append('file', file);
+
+            fetch('api/transaction/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': '*/*'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.code === "200"){
+                    showAlert(data.details, 'alert-success');
+                }
+                else {
+                    showAlert(data.details, 'alert-danger');
+                }
+            })
+            .catch(error => {
+                // Handle fetch error here
+                alert('Fetch error: ' + error.message);
+            });
+        } else {
+            alert('Please select a file.');
+        }
+    });
+
+    function showAlert(message, alertType) {
+        var alertDiv = document.createElement('div');
+        alertDiv.classList.add('alert', 'alert-dismissible', 'fade', 'show', alertType);
+        alertDiv.setAttribute('role', 'alert');
+        alertDiv.innerHTML = message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+        var container = document.querySelector('.container');
+        container.appendChild(alertDiv);
+
+        setTimeout(function () {
+            alertDiv.remove();
+        }, 5000);
+    }
+</script>
