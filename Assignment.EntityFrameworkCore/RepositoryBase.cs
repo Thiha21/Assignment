@@ -29,6 +29,10 @@ namespace Assignment.EntityFrameworkCore
         }
 
         #region Implementation
+        public virtual async Task AddRangeAsync(IEnumerable<T> entityList)
+        {
+            await dbSet.AddRangeAsync(entityList);
+        }
 
         public virtual async Task<IEnumerable<T>> GetManyAsync(Expression<Func<T, bool>> where)
         {

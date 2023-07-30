@@ -1,10 +1,20 @@
 ﻿using Assignment.Application.Contracts.Dtos;
 using Assignment.Application.Contracts.ServiceInterfaces;
+using Assignment.Domain.Entities;
 using Assignment.Domain.Repositories;
 using Assignment.Framework;
 using Assignment.Framework.Helper;
 using AutoMapper;
+using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.Configuration.Attributes;
+using Microsoft.AspNetCore.Http;
 using Serilog;
+using System.Collections.Generic;
+using System.Formats.Asn1;
+using System.Globalization;
+using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Assignment.Application.Services
 {
@@ -80,5 +90,115 @@ namespace Assignment.Application.Services
                 throw new AppException(ex.Message);
             }
         }
+
+        public async Task UploadFile(IFormFile file)
+        {
+            try
+            {
+                List<Transaction> transactions = new List<Transaction>();
+                if (file.FileName.EndsWith(".csv"))
+                {
+                    transactions = ParseCsv(file);
+                }
+                else
+                {
+                    transactions = ParseXml(file);
+                }
+                CheckMandatoryFieldsInTransaction(transactions);
+                await _transactionRepository.AddRangeAsync(transactions);
+                _unitOfWork.Commit();
+            }
+            catch (AppException ex)
+            {
+                Log.Error($"{ex.Message}");
+                throw new AppException(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"{ex.Message}\r\n{ex.StackTrace}\r\n{ex.InnerException}");
+                throw ex;
+            }
+        }
+
+        private List<Transaction> CheckMandatoryFieldsInTransaction(List<Transaction> tranList)
+        {
+            string errorMessage = string.Empty;
+            if (tranList.Any(x => string.IsNullOrWhiteSpace(x.TransactionId)))
+            {
+                errorMessage = ((errorMessage == string.Empty) ? "" : errorMessage + ", ") + "TransactionId Is Required";
+            }
+            if (tranList.Any(x => string.IsNullOrEmpty(x.Amount.ToString())))
+            {
+                errorMessage = ((errorMessage == string.Empty) ? "" : errorMessage + ", ") + "Amount Is Required";
+            }
+            if (tranList.Any(x => string.IsNullOrWhiteSpace(x.CurrencyCode)))
+            {
+                errorMessage = ((errorMessage == string.Empty) ? "" : errorMessage + ", ") + "CurrencyCode Is Required";
+            }
+            if (tranList.Any(x => string.IsNullOrWhiteSpace(x.TransactionDate.ToString())))
+            {
+                errorMessage = ((errorMessage == string.Empty) ? "" : errorMessage + ", ") + "TransactionDate Is Required";
+            }
+            if (tranList.Any(x => string.IsNullOrWhiteSpace(x.Status)))
+            {
+                errorMessage = ((errorMessage == string.Empty) ? "" : errorMessage + ", ") + "Status Is Required";
+            }
+            if(errorMessage != string.Empty)
+            {
+                throw new AppException(errorMessage);
+            }
+            return tranList;
+        }
+
+        private List<Transaction> ParseCsv(IFormFile file)
+        {
+            using (var reader = new StreamReader(file.OpenReadStream()))
+            {
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    AllowComments = true,
+                    Mode = CsvMode.RFC4180,
+                    HasHeaderRecord = false,
+                    BadDataFound = null,
+                    TrimOptions = TrimOptions.Trim,
+                    DetectColumnCountChanges = true,
+                };
+                using (var csvReader = new CsvReader(reader, config))
+                {
+                    csvReader.Context.RegisterClassMap<CsvMapper>();
+                    csvReader.Context.TypeConverterOptionsCache.GetOptions<DateTime>().Formats = new[] { "dd/MM/yyyy hh:mm:ss" };
+                    var records = csvReader.GetRecords<Transaction>().ToList();
+                    return records;
+                }
+            }
+        }
+
+        private List<Transaction> ParseXml(IFormFile file)
+        {
+            List<Transaction> transactions = new List<Transaction>();
+
+            using (var reader = new StreamReader(file.OpenReadStream()))
+            {
+                XDocument xmlDocument = XDocument.Parse(reader.ReadToEnd());
+                var transactionElements = xmlDocument.Descendants("Transaction");
+
+                foreach (var transactionElement in transactionElements)
+                {
+                    Transaction transaction = new Transaction
+                    {
+                        TransactionId = transactionElement.Attribute("id").Value,
+                        Amount = decimal.Parse(transactionElement.Element("PaymentDetails")?.Element("Amount").Value),
+                        CurrencyCode = transactionElement.Element("PaymentDetails")?.Element("CurrencyCode").Value,
+                        TransactionDate = DateTime.ParseExact(transactionElement.Element("TransactionDate").Value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                        Status = transactionElement.Element("Status").Value
+                    };
+
+                    transactions.Add(transaction);
+                }
+            }
+
+            return transactions;
+        }
+
     }
 }

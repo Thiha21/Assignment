@@ -9,6 +9,7 @@ namespace Assignment.Framework.Repositories
 {
     public interface IRepository<T> where T : class
     {
+        Task AddRangeAsync(IEnumerable<T> entityList);
         Task<IEnumerable<T>> GetManyAsync(Expression<Func<T, bool>> where);
         Task<IEnumerable<T>> GetManyAsync(Expression<Func<T, bool>> where, string include);
     }

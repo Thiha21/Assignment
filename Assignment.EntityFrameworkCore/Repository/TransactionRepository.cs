@@ -7,6 +7,5 @@ namespace Assignment.EntityFrameworkCore.Repository
     public class TransactionRepository : RepositoryBase<Transaction>, ITransactionRepository
     {
         public TransactionRepository(IDbFactory dbFactory) : base(dbFactory) { }
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Assignment.Application.Contracts.Dtos;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,6 @@ namespace Assignment.Application.Contracts.ServiceInterfaces
         Task<List<TransactionResponseDto>> GetByCurrencyCode(string currencyCode);
         Task<List<TransactionResponseDto>> GetTransactionByDateRange(GetTransactionByDateRange getTransactionByDateRange);
         Task<List<TransactionResponseDto>> GetByStatus(string status);
+        Task UploadFile(IFormFile file);
     }
 }
