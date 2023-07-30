@@ -15,4 +15,5 @@ namespace Assignment.Framework.ApiDtos
         public string Code { get; set; }
         public string Message { get; set; }
         public string Details { get; set; }
+    }
 }
