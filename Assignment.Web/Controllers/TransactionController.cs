@@ -135,7 +135,7 @@ namespace Assignment.Api.Controllers
                 {
                     Code = ErrorCodes.ErrorCodeBadRequest,
                     Message = ErrorMessages.ErrorMessageUnknownFormat,
-                    Details = ""
+                    Details = "Unknown Format"
                 });
             }
 
